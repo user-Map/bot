@@ -10,6 +10,9 @@ async def run(bot, message, args):
     if len(args) < 2:
         return await message.reply("⚡ dùng: ..ai nội_dung")
 
+    if not API_KEY:
+        return await message.reply("❌ Chưa set GROQ_KEY")
+
     text = " ".join(args[1:])
     chat_id = message.chat.id
 
@@ -37,6 +40,10 @@ async def run(bot, message, args):
 
         data = r.json()
 
+        # ⭐ CHECK ERROR
+        if "error" in data:
+            return await message.reply("❌ API lỗi: " + str(data["error"]["message"]))
+
         reply = data["choices"][0]["message"]["content"]
 
         memory[chat_id].append({
@@ -47,4 +54,4 @@ async def run(bot, message, args):
         await message.reply(reply)
 
     except Exception as e:
-        await message.reply("❌ AI lỗi: " + str(e))
+        await message.reply("❌ AI crash: " + str(e))
