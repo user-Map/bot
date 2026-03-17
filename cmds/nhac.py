@@ -1,48 +1,40 @@
-import yt_dlp
-import asyncio
-import os
+import aiohttp
+from aiogram import types
 
-async def run(bot, message, args):
+async def run(bot, message: types.Message, args):
 
-    query = " ".join(args)
+    if len(args) < 2:
+        return await message.reply("❌ Dùng: ..nhac <tên bài>")
 
-    if not query:
-        return await message.reply("🎧 Nhập tên bài hát")
+    query = " ".join(args[1:])
 
     await message.reply("🔎 Đang tìm nhạc...")
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': 'song.%(ext)s',
-        'quiet': True,
-        'noplaylist': True
-    }
+    try:
+        async with aiohttp.ClientSession() as session:
 
-    loop = asyncio.get_event_loop()
+            # 🔥 search youtube
+            async with session.get(
+                f"https://api.vevioz.com/api/button/youtube?q={query}"
+            ) as res:
 
-    def download():
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"ytsearch1:{query}", download=True)
-            return info
+                text = await res.text()
 
-    info = await loop.run_in_executor(None, download)
+                # 👉 lấy video id
+                import re
+                find = re.search(r"watch\\?v=(.{11})", text)
 
-    file = None
-    for f in os.listdir():
-        if f.startswith("song."):
-            file = f
+                if not find:
+                    return await message.reply("❌ Không tìm thấy nhạc")
 
-    if not file:
-        return await message.reply("❌ Lỗi tải nhạc")
+                vid = find.group(1)
 
-    title = info['entries'][0]['title']
+            # 🔥 lấy link mp3
+            link = f"https://api.vevioz.com/api/button/mp3/{vid}"
 
-    await message.reply("⬇️ Đang gửi nhạc...")
+            await message.reply(
+                f"🎧 Nhạc của bạn đây:\n{link}"
+            )
 
-    await bot.send_audio(
-        message.chat.id,
-        open(file, 'rb'),
-        title=title
-    )
-
-    os.remove(file)
+    except Exception as e:
+        await message.reply(f"❌ Lỗi: {e}")
