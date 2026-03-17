@@ -1,4 +1,4 @@
-import aiohttp
+import yt_dlp
 from aiogram import types
 
 async def run(bot, message: types.Message, args):
@@ -11,25 +11,23 @@ async def run(bot, message: types.Message, args):
     msg = await message.reply("🔎 Đang tìm nhạc...")
 
     try:
-        async with aiohttp.ClientSession() as session:
+        ydl_opts = {
+            "format": "bestaudio",
+            "quiet": True,
+            "noplaylist": True
+        }
 
-            # 🔥 search nhạc
-            async with session.get(
-                f"https://api.popcat.xyz/youtube?q={query}"
-            ) as res:
-                data = await res.json()
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"ytsearch1:{query}", download=False)
 
-            if not data or "url" not in data:
-                return await msg.edit_text("❌ Không tìm thấy")
+            video = info["entries"][0]
 
-            video = data["url"]
+            title = video["title"]
+            link = video["webpage_url"]
 
-            # 🔥 lấy mp3
-            mp3 = f"https://api.popcat.xyz/ytmp3?url={video}"
-
-            await msg.edit_text(
-                f"🎧 Nhạc đây:\n{mp3}"
-            )
+        await msg.edit_text(
+            f"🎧 {title}\n{link}"
+        )
 
     except Exception as e:
         await msg.edit_text(f"❌ Lỗi: {e}")
