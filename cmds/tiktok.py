@@ -1,14 +1,24 @@
+import re
 import os
 import yt_dlp
 from aiogram.types import FSInputFile
 
+
+def get_tiktok_url(text):
+    urls = re.findall(r'(https?://\S+)', text)
+    for u in urls:
+        if "tiktok" in u:
+            return u
+    return None
+
+
 async def run(bot, message, args):
 
-    if not args:
-        await message.reply("⚡ dùng: ..tiktok link")
-        return
+    url = get_tiktok_url(message.text)
 
-    url = args[0]
+    if not url:
+        await message.reply("❌ Không tìm thấy link TikTok")
+        return
 
     panel = await message.reply("""
 ╔══════════════════╗
@@ -37,7 +47,7 @@ async def run(bot, message, args):
             caption=f"""
 🎬 {title}
 
-⬇️ Tải bằng USERMAP PRO
+⬇️ USERMAP DOWNLOADER
 """
         )
 
