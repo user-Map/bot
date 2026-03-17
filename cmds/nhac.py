@@ -21,8 +21,8 @@ async def run(bot, message, args):
         async with session.get(url, headers=headers) as res:
             data = await res.json()
 
-    if not data["data"]:
-        return await msg.edit_text("❌ Không tìm thấy")
+    if not data.get("data"):
+        return await msg.edit_text("❌ Không tìm thấy bài")
 
     song = data["data"][0]
 
@@ -31,8 +31,12 @@ async def run(bot, message, args):
     preview = song["preview"]
     thumb = song["album"]["cover_big"]
 
-    text = f"🎧 {title}\n👤 {artist}\n\n▶️ Nghe thử:\n{preview}"
-
-    await bot.send_photo(message.chat.id, thumb, caption=text)
+    await bot.send_audio(
+        message.chat.id,
+        audio=preview,
+        title=title,
+        performer=artist,
+        thumb=thumb
+    )
 
     await msg.delete()
