@@ -1,11 +1,8 @@
-import yt_dlp
-import asyncio
-import os
+import aiohttp
 
-cache = {}
+API_KEY = "db2d0600admshc5c042c9e80276ep18d4dajsn87984be2b676"
 
 async def run(bot, message, args):
-
     query = " ".join(args[1:])
 
     if not query:
@@ -13,75 +10,29 @@ async def run(bot, message, args):
 
     msg = await message.reply("🔎 Đang tìm nhạc...")
 
-    loop = asyncio.get_event_loop()
+    url = f"https://deezerdevs-deezer.p.rapidapi.com/search?q={query}"
 
-    def search():
-        with yt_dlp.YoutubeDL({
-            "quiet": True,
-            "skip_download": True
-        }) as ydl:
-            info = ydl.extract_info(
-                f"ytsearch5:{query}",
-                download=False
-            )
-            return info["entries"]
+    headers = {
+        "X-RapidAPI-Key": API_KEY,
+        "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
+    }
 
-    results = await loop.run_in_executor(None, search)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as res:
+            data = await res.json()
 
-    cache[message.message_id] = results
+    if not data["data"]:
+        return await msg.edit_text("❌ Không tìm thấy")
 
-    text = "🎧 CHỌN NHẠC\n\n"
+    song = data["data"][0]
 
-    for i, r in enumerate(results, 1):
-        text += f"{i}. {r['title']}\n"
+    title = song["title"]
+    artist = song["artist"]["name"]
+    preview = song["preview"]
+    thumb = song["album"]["cover_big"]
 
-    text += "\n👉 Reply số để tải"
+    text = f"🎧 {title}\n👤 {artist}\n\n▶️ Nghe thử:\n{preview}"
 
-    await msg.edit_text(text)
+    await bot.send_photo(message.chat.id, thumb, caption=text)
 
-
-async def reply(bot, message):
-
-    if not message.reply_to_message:
-        return
-
-    mid = message.reply_to_message.message_id
-
-    if mid not in cache:
-        return
-
-    try:
-        index = int(message.text) - 1
-        video = cache[mid][index]
-    except:
-        return
-
-    url = video["webpage_url"]
-
-    msg = await message.reply("⬇️ Đang tải mp3...")
-
-    def download():
-        with yt_dlp.YoutubeDL({
-            "format": "bestaudio",
-            "outtmpl": "song.%(ext)s",
-            "quiet": True
-        }) as ydl:
-            ydl.download([url])
-
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, download)
-
-    file = None
-    for f in os.listdir():
-        if f.startswith("song."):
-            file = f
-
-    await msg.edit_text("📤 Đang gửi...")
-
-    await bot.send_audio(
-        message.chat.id,
-        open(file, "rb"),
-        title=video["title"]
-    )
-
-    os.remove(file)
+    await msg.delete()
