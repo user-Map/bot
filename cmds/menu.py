@@ -1,10 +1,8 @@
-from aiogram import types
-
 async def run(bot, message, args):
 
     text = """
 ╔══════════════════╗
-   🔥 𝗨𝗦𝗘𝗥𝗠𝗔𝗣 𝗩𝗜𝗣 🔥
+   🔥 USERMAP VIP 🔥
 ╚══════════════════╝
 
 🤖 AI
@@ -19,19 +17,13 @@ async def run(bot, message, args):
 🛠 TOOL
 ┠➤ ..id
 ┠➤ ..time
-┠➤ ..ping
 ┠➤ ..uptime
 
 👥 GROUP
 ┠➤ ..map
 ┠➤ ..tagall
-┠➤ ..kick (reply)
 
 ⚙️ ADMIN
-┠➤ ..reload
-
-ㅤ
-      ᵇᵒᵗ ᵇʸ 𝗻𝗴𝘂𝘆𝗲𝗻𝗸𝗵𝗼𝗶
+┠➤ ..manager
 """
-
     await message.reply(text)
