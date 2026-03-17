@@ -1,5 +1,4 @@
-import yt_dlp
-import asyncio
+import aiohttp
 
 cache = {}
 
@@ -9,21 +8,19 @@ async def run(bot, message, args):
     if not query:
         return await message.reply("❌ Dùng: ..nhacyt tên bài")
 
-    msg = await message.reply("🔎 Đang tìm nhạc...")
+    msg = await message.reply("🔎 Đang tìm...")
 
-    ydl_opts = {
-        'quiet': True,
-        'skip_download': True
-    }
+    url = f"https://api.vevioz.com/api/search?q={query}"
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch5:{query}", download=False)
+    async with aiohttp.ClientSession() as s:
+        async with s.get(url) as r:
+            data = await r.json()
 
-    videos = info["entries"]
+    videos = data["items"][:5]
 
     text = "🎧 Chọn bài:\n\n"
 
-    for i, v in enumerate(videos, 1):
+    for i,v in enumerate(videos,1):
         text += f"{i}. {v['title']}\n"
 
     cache[message.from_user.id] = videos
@@ -38,29 +35,20 @@ async def choose(bot, message):
     if not message.text.isdigit():
         return
 
-    index = int(message.text) - 1
+    index = int(message.text)-1
     videos = cache[message.from_user.id]
 
-    if index < 0 or index >= len(videos):
+    if index<0 or index>=len(videos):
         return
 
     video = videos[index]
 
-    url = video["webpage_url"]
+    await bot.send_message(message.chat.id,"📥 Đang lấy nhạc...")
 
-    await bot.send_message(message.chat.id, "📥 Đang tải mp3...")
-
-    ydl_opts = {
-        'format': 'bestaudio',
-        'outtmpl': 'song.mp3',
-        'quiet': True
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    mp3 = f"https://api.vevioz.com/api/button/mp3/{video['url']}"
 
     await bot.send_audio(
         message.chat.id,
-        audio=open("song.mp3", "rb"),
+        audio=mp3,
         title=video["title"]
     )
