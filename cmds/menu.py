@@ -1,9 +1,8 @@
 async def run(bot, message, args):
 
     text = """
-╔══════════════════╗
-   🔥 USERMAP VIP 🔥
-╚══════════════════╝
+🔥 USERMAP VIP 🔥
+━━━━━━━━━━━━━━━
 
 🤖 AI
 ┠➤ ..ai <câu hỏi>
@@ -13,15 +12,6 @@ async def run(bot, message, args):
 
 🌦 THỜI TIẾT
 ┠➤ ..weather <thành phố>
-
-🛠 TOOL
-┠➤ ..id
-┠➤ ..time
-┠➤ ..uptime
-
-👥 GROUP
-┠➤ ..map
-┠➤ ..tagall
 
 ⚙️ ADMIN
 ┠➤ ..manager
