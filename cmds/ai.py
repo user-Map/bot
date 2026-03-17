@@ -1,7 +1,7 @@
-import os
 import requests
+import os
 
-API_KEY = os.getenv("OPENAI_KEY")
+API_KEY = os.getenv("GROQ_KEY")
 
 memory = {}
 
@@ -23,23 +23,19 @@ async def run(bot, message, args):
 
     try:
         r = requests.post(
-            "https://api.openai.com/v1/chat/completions",
+            "https://api.groq.com/openai/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "gpt-4o-mini",
+                "model": "llama3-8b-8192",
                 "messages": memory[chat_id][-10:]
             },
             timeout=60
         )
 
         data = r.json()
-
-        # ⭐ CHECK ERROR
-        if "choices" not in data:
-            return await message.reply(f"❌ OpenAI lỗi:\n{data}")
 
         reply = data["choices"][0]["message"]["content"]
 
@@ -51,4 +47,4 @@ async def run(bot, message, args):
         await message.reply(reply)
 
     except Exception as e:
-        await message.reply("❌ AI crash: " + str(e))
+        await message.reply("❌ AI lỗi: " + str(e))
