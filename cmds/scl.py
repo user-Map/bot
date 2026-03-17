@@ -1,5 +1,5 @@
+import aiohttp
 import asyncio
-import yt_dlp
 
 cache = {}
 
@@ -8,43 +8,27 @@ async def run(bot, message, args):
     query = " ".join(args)
 
     if not query:
-        return await message.reply("🎧 Nhập tên bài: .scl <tên>")
+        return await message.reply("🎧 Nhập tên bài: ..scl <tên>")
 
-    loop = asyncio.get_event_loop()
+    url = f"https://api-vn1.zaclys.com/music/search?q={query}"
 
-    def search():
-        with yt_dlp.YoutubeDL({
-            "quiet": True,
-            "skip_download": True
-        }) as ydl:
-            info = ydl.extract_info(
-                f"ytsearch5:{query}",
-                download=False
-            )
-            return info["entries"]
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as res:
+            data = await res.json()
 
-    results = await loop.run_in_executor(None, search)
+    if not data:
+        return await message.reply("❌ Không tìm thấy")
 
-    text = "🎵 <b>DANH SÁCH NHẠC</b>\n\n"
+    cache[message.message_id] = data[:5]
 
-    for i, r in enumerate(results, 1):
-        text += f"{i}. {r['title']}\n"
+    text = "🎵 DANH SÁCH NHẠC\n\n"
+
+    for i, song in enumerate(data[:5], 1):
+        text += f"{i}. {song['title']}\n"
 
     text += "\n👉 Reply số để chọn"
 
-    msg = await message.reply(text, parse_mode="HTML")
-
-    cache[msg.message_id] = results
-
-    # auto xoá list sau 60s
-    async def auto_delete():
-        await asyncio.sleep(60)
-        try:
-            await msg.delete()
-        except:
-            pass
-
-    asyncio.create_task(auto_delete())
+    await message.reply(text)
 
 
 async def reply(bot, message):
@@ -63,26 +47,10 @@ async def reply(bot, message):
     except:
         return
 
-    title = song["title"]
-    thumb = song["thumbnail"]
-    url = song["url"]
-
-    caption = f"""
-🎧 <b>{title}</b>
-
-✨ Quality: HD
-🚀 Powered by USERMAP
-"""
-
-    await bot.send_photo(
-        message.chat.id,
-        thumb,
-        caption=caption,
-        parse_mode="HTML"
-    )
+    await message.reply("⬇️ Đang gửi nhạc...")
 
     await bot.send_audio(
         message.chat.id,
-        url,
-        title=title
+        song["url"],
+        title=song["title"]
     )
