@@ -53,6 +53,13 @@ async def handle(message: types.Message):
     except:
         pass
 
+    # ⭐ THÊM CHỖ NÀY → để bắt reply chọn nhạc scl
+    try:
+        if "scl" in commands:
+            await commands["scl"].reply(bot, message)
+    except:
+        pass
+
     # ⭐ PREFIX
     if not message.text.startswith(PREFIX):
         return
