@@ -43,6 +43,6 @@ async def run(bot, message, args):
             parse_mode="HTML"
         )
 
-        await asyncio.sleep(random.uniform(2,3))   # ⭐ delay random 4-5s
+        await asyncio.sleep(random.uniform(1,2))   # ⭐ delay random 4-5s
 
     await message.reply(" 𝓑𝓸̂́ đ𝓪̃ 𝓽𝓱𝓪 𝓬𝓱𝓸 𝓬𝓸𝓷 𝓻𝓸̂̀𝓲 đ𝓸́ 𝓬𝓸𝓷 đ𝓲̉ 𝓬𝓱𝓸́ 𝓑𝓲𝓮̂́𝓽 𝓬𝓪̉𝓶 𝓸̛𝓷 𝓴𝓸 𝓿𝓪̣̂𝔂 đ𝓲̉ 𝓷𝓰𝓾=)) ")
