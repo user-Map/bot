@@ -1,34 +1,26 @@
 import requests
-from aiogram import types
-
-API = "https://wttr.in/{}?format=j1"
 
 async def run(bot, message, args):
-
     if len(args) < 2:
-        return await message.reply("🌦 Dùng: ..weather <thành phố>")
+        return await message.reply("❌ Dùng: ..weather <thành phố>")
 
     city = " ".join(args[1:])
 
     try:
-        r = requests.get(API.format(city))
-        data = r.json()
+        url = f"https://wttr.in/{city}?format=j1"
+        data = requests.get(url, timeout=10).json()
 
-        now = data["current_condition"][0]
-        temp = now["temp_C"]
-        feel = now["FeelsLikeC"]
-        humidity = now["humidity"]
-        wind = now["windspeedKmph"]
-        desc = now["weatherDesc"][0]["value"]
+        temp = data["current_condition"][0]["temp_C"]
+        feel = data["current_condition"][0]["FeelsLikeC"]
+        desc = data["current_condition"][0]["weatherDesc"][0]["value"]
+        hum = data["current_condition"][0]["humidity"]
 
         text = f"""
-🌦 THỜI TIẾT {city.upper()}
-
+🌤 Thời tiết: {city}
 🌡 Nhiệt độ: {temp}°C
-🥵 Cảm giác như: {feel}°C
-☁ Trạng thái: {desc}
-💧 Độ ẩm: {humidity}%
-🌬 Gió: {wind} km/h
+🥵 Cảm giác: {feel}°C
+💧 Độ ẩm: {hum}%
+📌 Trạng thái: {desc}
 """
 
         await message.reply(text)
