@@ -13,23 +13,12 @@ dp = Dispatcher()
 
 commands = {}
 spam = {}
-
-# ===== DATABASE =====
-
-def load_db():
-    try:
-        with open("db.json") as f:
-            return json.load(f)
-    except:
-        return {}
-
-def save_db(data):
-    with open("db.json","w") as f:
-        json.dump(data,f)
+start_time = time.time()
 
 # ===== LOAD COMMAND =====
 
 def load_cmds():
+    commands.clear()
     for root, dirs, files in os.walk("cmds"):
         for file in files:
             if file.endswith(".py"):
@@ -40,53 +29,71 @@ def load_cmds():
 
 load_cmds()
 
-# ===== WELCOME =====
+# ===== DB RAM =====
+db = {}
 
+# ===== WELCOME =====
 @dp.message(lambda m: m.new_chat_members)
 async def welcome(message: types.Message):
-    for user in message.new_chat_members:
-        await message.reply(f"👋 chào mừng {user.first_name} vào nhóm")
+    for u in message.new_chat_members:
+        await message.reply(f"👋 Welcome {u.first_name}")
+
+# ===== GOODBYE =====
+@dp.message(lambda m: m.left_chat_member)
+async def bye(message: types.Message):
+    await message.reply("😢 Thành viên đã rời nhóm")
 
 # ===== MESSAGE =====
-
 @dp.message()
 async def handle(message: types.Message):
     try:
         text = message.text
         uid = str(message.from_user.id)
 
-        # ===== SPAM =====
+        # ===== SPAM SMART =====
         now = time.time()
-        if uid not in spam:
-            spam[uid] = []
+        spam.setdefault(uid, []).append(now)
+        spam[uid] = [t for t in spam[uid] if now - t < 4]
 
-        spam[uid].append(now)
-        spam[uid] = [t for t in spam[uid] if now - t < 5]
-
-        if len(spam[uid]) > 6:
+        if len(spam[uid]) > 7:
             try:
                 await bot.restrict_chat_member(
                     message.chat.id,
                     message.from_user.id,
-                    permissions=types.ChatPermissions(can_send_messages=False),
-                    until_date=int(time.time()) + 60
+                    permissions=types.ChatPermissions(
+                        can_send_messages=False
+                    ),
+                    until_date=int(time.time()) + 90
                 )
-                await message.reply("🤬 spam nhiều quá → mute 60s")
+                await message.reply("🤬 Spam → mute 90s")
             except:
                 pass
             return
 
         # ===== DB CHAT =====
-        db = load_db()
-        if uid not in db:
-            db[uid] = 0
-        db[uid] += 1
-        save_db(db)
+        db[uid] = db.get(uid, 0) + 1
 
         # ===== COMMAND =====
         if text and text.startswith(PREFIX):
             args = text[len(PREFIX):].split()
             cmd = args[0]
+
+            if cmd == "reload":
+                load_cmds()
+                return await message.reply("♻️ reload xong")
+
+            if cmd == "uptime":
+                up = int(time.time() - start_time)
+                return await message.reply(f"⏱ uptime: {up}s")
+
+            if cmd == "top":
+                top = sorted(db.items(), key=lambda x: x[1], reverse=True)[:10]
+                msg = "🏆 BXH CHAT\n\n"
+                i = 1
+                for u,c in top:
+                    msg += f"{i}. {u} → {c}\n"
+                    i += 1
+                return await message.reply(msg)
 
             if cmd in commands:
                 await commands[cmd].run(bot, message, args)
@@ -95,9 +102,8 @@ async def handle(message: types.Message):
         print("ERROR:", e)
 
 # ===== START =====
-
 async def main():
-    print("🔥 BOT TELE PRO RUNNING")
+    print("🔥 ULTRA TELE BOT RUNNING")
     await dp.start_polling(bot)
 
 asyncio.run(main())
