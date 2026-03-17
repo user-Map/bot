@@ -5,17 +5,16 @@ async def run(bot, message, args):
     else:
         user = message.from_user
 
-    try:
-        photos = await bot.get_profile_photos(user.id, limit=1)
+    uid = user.id
+    name = user.first_name
 
-        if photos.total_count == 0:
-            return await message.reply("❌ Không có avatar")
+    link = f"tg://user?id={uid}"
 
-        await bot.send_photo(
-            message.chat.id,
-            photos.photos[0][-1].file_id,
-            caption=f"🖼 Avatar {user.first_name}"
-        )
+    text = f"""
+🖼 Avatar {name}
 
-    except Exception as e:
-        await message.reply(f"Lỗi avatar: {e}")
+👉 Bấm link dưới để xem:
+{link}
+"""
+
+    await message.reply(text)
