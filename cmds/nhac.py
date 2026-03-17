@@ -36,7 +36,6 @@ async def run(bot, message, args):
         audio=preview,
         title=title,
         performer=artist,
-        thumb=thumb
     )
 
     await msg.delete()
