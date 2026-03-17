@@ -1,15 +1,6 @@
-import requests
 import os
+import yt_dlp
 from aiogram.types import FSInputFile
-
-headers = {
-    "user-agent": "Mozilla/5.0"
-}
-
-def get_real_url(url):
-    r = requests.get(url, allow_redirects=True, headers=headers, timeout=10)
-    return r.url
-
 
 async def run(bot, message, args):
 
@@ -21,50 +12,37 @@ async def run(bot, message, args):
 
     panel = await message.reply("""
 ╔══════════════════╗
-   🎬 ĐANG XỬ LÝ
+   🎬 ĐANG TẢI VIDEO
 ╚══════════════════╝
 """)
 
     try:
 
-        if "vt.tiktok.com" in url:
-            url = get_real_url(url)
+        ydl_opts = {
+            'outtmpl': 'video.mp4',
+            'format': 'mp4',
+            'quiet': True
+        }
 
-        api = f"https://www.tikwm.com/api/?url={url}"
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
 
-        res = requests.get(api, headers=headers, timeout=30)
+        title = info.get("title", "TikTok Video")
 
-        data = res.json()
+        file = FSInputFile("video.mp4")
 
-        if "data" not in data:
-            await panel.edit_text("❌ API không trả dữ liệu")
-            return
-
-        video_url = data["data"]["play"]
-        title = data["data"]["title"]
-        author = data["data"]["author"]["nickname"]
-
-        await panel.edit_text("⬇️ Đang tải video HD...")
-
-        video = requests.get(video_url, headers=headers, timeout=60).content
-
-        with open("tt.mp4", "wb") as f:
-            f.write(video)
-
-        file = FSInputFile("tt.mp4")
-
-        await bot.send_video(
+        await bot.send_document(
             chat_id=message.chat.id,
-            video=file,
+            document=file,
             caption=f"""
 🎬 {title}
 
-👤 {author}
+⬇️ Tải bằng USERMAP PRO
 """
         )
 
-        os.remove("tt.mp4")
+        os.remove("video.mp4")
         await panel.delete()
 
     except Exception as e:
-        await panel.edit_text(f"❌ Lỗi: {e}")
+        await panel.edit_text(f"❌ Lỗi tải:\n{e}")
