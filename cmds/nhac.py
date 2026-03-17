@@ -1,32 +1,47 @@
-import yt_dlp
+import requests
+from telegram import Update
+from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
 
-async def run(bot, message, args):
-    query = " ".join(args[1:])
+TOKEN = "BOT_TOKEN"
 
-    if not query:
-        return await message.reply("❌ Dùng: ..nhac tên bài")
+async def nhac(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
 
-    msg = await message.reply("🔎 Đang tìm nhạc...")
+    if not text.startswith(".nhac"):
+        return
 
-    ydl_opts = {
-        "quiet": True,
-        "skip_download": True,
-        "format": "bestaudio"
-    }
+    keyword = text.replace(".nhac", "").strip()
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"ytsearch1:{query}", download=False)
+    if not keyword:
+        await update.message.reply_text("❌ Nhập tên bài")
+        return
 
-        video = info["entries"][0]
+    msg = await update.message.reply_text("🔎 Đang tìm nhạc...")
 
-        await bot.send_audio(
-            message.chat.id,
-            audio=video["url"],
-            title=video["title"]
-        )
+    url = f"https://ytsearch.vercel.app/api?query={keyword}"
+    data = requests.get(url).json()
 
-        await msg.delete()
+    if not data["results"]:
+        await msg.edit_text("❌ Không tìm thấy nhạc")
+        return
 
-    except:
-        await msg.edit_text("❌ Không lấy được nhạc (server bị YouTube chặn)")
+    menu = "🎧 <b>KẾT QUẢ TÌM NHẠC</b>\n\n"
+
+    for i, v in enumerate(data["results"][:5], start=1):
+        title = v["title"]
+        link = v["url"]
+        duration = v["duration"]
+
+        menu += f"""
+{i}️⃣ <b>{title}</b>
+⏱ {duration}
+▶️ <a href="{link}">Nghe ngay</a>
+
+"""
+
+    await msg.edit_text(menu, parse_mode="HTML", disable_web_page_preview=True)
+
+app = ApplicationBuilder().token(TOKEN).build()
+app.add_handler(MessageHandler(filters.TEXT, nhac))
+
+app.run_polling()
