@@ -3,7 +3,7 @@ import asyncio
 import importlib
 from aiogram import Bot, Dispatcher, types
 
-TOKEN = "DÁN_TOKEN_BOT_VÀO_ĐÂY"
+TOKEN = "8603942729:AAGE1RaT8oXoVhWCXhKhp5fbAdQVKHqOIL4"
 PREFIX = ".."
 
 bot = Bot(TOKEN)
