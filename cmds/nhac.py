@@ -1,6 +1,6 @@
 import aiohttp
 
-API_KEY = "db2d0600admshc5c042c9e80276ep18d4dajsn87984be2b676"
+cache = {}
 
 async def run(bot, message, args):
     query = " ".join(args[1:])
@@ -10,32 +10,43 @@ async def run(bot, message, args):
 
     msg = await message.reply("🔎 Đang tìm nhạc...")
 
-    url = f"https://deezerdevs-deezer.p.rapidapi.com/search?q={query}"
-
-    headers = {
-        "X-RapidAPI-Key": API_KEY,
-        "X-RapidAPI-Host": "deezerdevs-deezer.p.rapidapi.com"
-    }
+    url = f"https://api.popcat.xyz/lyrics?song={query}"
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as res:
+        async with session.get(url) as res:
             data = await res.json()
 
-    if not data.get("data"):
-        return await msg.edit_text("❌ Không tìm thấy bài")
+    if "title" not in data:
+        return await msg.edit_text("❌ Không tìm thấy")
 
-    song = data["data"][0]
+    title = data["title"]
+    artist = data["artist"]
+    thumb = data["image"]
 
-    title = song["title"]
-    artist = song["artist"]["name"]
-    preview = song["preview"]
-    thumb = song["album"]["cover_big"]
+    text = f"""
+🎧 {title}
+👤 {artist}
 
-    await bot.send_audio(
-        message.chat.id,
-        audio=preview,
-        title=title,
-        performer=artist,
-    )
+📥 Gửi số 1 để tải nhạc
+"""
+
+    cache[message.from_user.id] = query
+
+    await bot.send_photo(message.chat.id, thumb, caption=text)
 
     await msg.delete()
+
+
+async def choose(bot, message):
+    if message.from_user.id not in cache:
+        return
+
+    if message.text != "1":
+        return
+
+    query = cache[message.from_user.id]
+
+    await bot.send_message(
+        message.chat.id,
+        f"🎧 Đây là link tải MP3:\nhttps://api.vevioz.com/api/button/mp3/{query}"
+    )
