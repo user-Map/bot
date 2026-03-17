@@ -1,39 +1,26 @@
 import os
 import requests
-from telegram import Update
-from telegram.ext import ContextTypes
 
 API_KEY = os.getenv("OPENAI_KEY")
 
-chat_memory = {}
+memory = {}
 
-async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.message
+async def run(bot, message, args):
 
-    if not msg:
-        return
+    if len(args) < 2:
+        return await message.reply("⚡ dùng: ..ai nội_dung")
 
-    text = msg.text.replace("..ai", "").strip()
+    text = " ".join(args[1:])
 
-    if not text:
-        await msg.reply_text("⚡ dùng: ..ai nội_dung")
-        return
+    chat_id = message.chat.id
 
-    if not API_KEY:
-        await msg.reply_text("❌ Chưa set API KEY")
-        return
+    if chat_id not in memory:
+        memory[chat_id] = []
 
-    chat_id = msg.chat_id
-
-    if chat_id not in chat_memory:
-        chat_memory[chat_id] = []
-
-    chat_memory[chat_id].append({
+    memory[chat_id].append({
         "role": "user",
         "content": text
     })
-
-    await context.bot.send_chat_action(chat_id, "typing")
 
     try:
         r = requests.post(
@@ -44,7 +31,7 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
             },
             json={
                 "model": "gpt-4o-mini",
-                "messages": chat_memory[chat_id][-8:]
+                "messages": memory[chat_id][-10:]
             },
             timeout=60
         )
@@ -53,18 +40,12 @@ async def ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         reply = data["choices"][0]["message"]["content"]
 
-        chat_memory[chat_id].append({
+        memory[chat_id].append({
             "role": "assistant",
             "content": reply
         })
 
-        if msg.reply_to_message:
-            await msg.reply_text(
-                reply,
-                reply_to_message_id=msg.reply_to_message.message_id
-            )
-        else:
-            await msg.reply_text(reply)
+        await message.reply(reply)
 
     except Exception as e:
-        await msg.reply_text("❌ AI lỗi: " + str(e))
+        await message.reply("❌ AI lỗi: " + str(e))
