@@ -12,15 +12,14 @@ dp = Dispatcher()
 commands = {}
 
 def load_cmds():
-    path = "cmds"
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-    for file in os.listdir(path):
-        if file.endswith(".py"):
-            name = file[:-3]
-            module = importlib.import_module(f"cmds.{name}")
-            commands[name] = module
+    for root, dirs, files in os.walk("cmds"):
+        for file in files:
+            if file.endswith(".py"):
+                path = os.path.join(root, file)
+                module_name = path.replace("/", ".").replace("\\", ".")[:-3]
+                module = importlib.import_module(module_name)
+                cmd_name = file[:-3]
+                commands[cmd_name] = module
 
 load_cmds()
 
@@ -31,13 +30,17 @@ async def handle_msg(message: types.Message):
         return
 
     if text.startswith(PREFIX):
-        cmd = text[len(PREFIX):].split()[0]
+        args = text[len(PREFIX):].split()
+        cmd = args[0]
 
         if cmd in commands:
-            await commands[cmd].run(bot, message)
+            try:
+                await commands[cmd].run(bot, message, args)
+            except:
+                await message.reply("⚠️ lỗi lệnh")
 
 async def main():
-    print("BOT STARTED")
+    print("🤖 TELE BOT FULL RUNNING")
     await dp.start_polling(bot)
 
 asyncio.run(main())
