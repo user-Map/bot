@@ -1,5 +1,6 @@
 import yt_dlp
 import os
+from aiogram.types import FSInputFile
 
 async def run(bot, message, args):
 
@@ -23,9 +24,11 @@ async def run(bot, message, args):
             file = ydl.prepare_filename(info['entries'][0])
             title = info['entries'][0]['title']
 
+        audio = FSInputFile(file)
+
         await bot.send_audio(
             chat_id=message.chat.id,
-            audio=file,
+            audio=audio,
             title=title
         )
 
