@@ -1,108 +1,62 @@
+import yt_dlp
 import os
-import time
-import asyncio
-import importlib
-import json
+import requests
 
-from aiogram import Bot, Dispatcher, types
-
-TOKEN = os.environ.get("BOT_TOKEN")
-PREFIX = ".."
-
-bot = Bot(TOKEN)
-dp = Dispatcher()
-
-commands = {}
-start_time = time.time()
-
-
-# ⭐ tạo file json nếu chưa có
-if not os.path.exists("group.json"):
-    open("group.json", "w").write('{"warn":{},"antilink":false,"antibot":false}')
-
-if not os.path.exists("admins.json"):
-    open("admins.json", "w").write('{"owner":[],"admin":[]}')
-
-
-# ⭐ load command
-def load_commands():
-    commands.clear()
-    for file in os.listdir("cmds"):
-        if file.endswith(".py"):
-            name = file[:-3]
-            module = importlib.import_module(f"cmds.{name}")
-            importlib.reload(module)
-            commands[name] = module
-
-load_commands()
-
-
-@dp.message()
-async def handle(message: types.Message):
-
-    if not message.text:
-        return
-
-    # 🔥 ANTI LINK (chỉ chạy khi ON)
+def expand(url):
     try:
-        g = json.load(open("group.json"))
-        if g.get("antilink"):
-            if "http" in message.text or "t.me" in message.text:
-                await message.delete()
-                return
+        r = requests.get(url, allow_redirects=True, timeout=10)
+        return r.url
     except:
-        pass
+        return url
 
-    # ⭐ THÊM CHỖ NÀY → để bắt reply chọn nhạc scl
+
+async def run(bot, message, args):
+
+    if len(args) < 2:
+        return await message.reply("⚡ dùng: ..tiktok link")
+
+    url = args[1]
+    url = expand(url)
+
+    panel = await message.reply("""
+╔══════════════╗
+   🎬 Đang tải TikTok
+   ⏳ vui lòng chờ...
+╚══════════════╝
+""")
+
+    ydl_opts = {
+        'outtmpl': 'video.mp4',
+        'format': 'best',
+        'quiet': True,
+        'noplaylist': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10)'
+        }
+    }
+
     try:
-        if "scl" in commands:
-            await commands["scl"].reply(bot, message)
-    except:
-        pass
 
-    # ⭐ PREFIX
-    if not message.text.startswith(PREFIX):
-        return
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
 
-    args = message.text[len(PREFIX):].split()
-    cmd = args[0].lower()
+        title = info.get("title", "TikTok Video")
 
-    if cmd == "reload":
-        load_commands()
-        return await message.reply("♻️ Reload OK")
+        await bot.send_document(
+            message.chat.id,
+            document=open("video.mp4", "rb"),
+            caption=f"🎬 {title}"
+        )
 
-    if cmd == "uptime":
-        up = int(time.time() - start_time)
-        return await message.reply(f"⏱ Uptime: {up}s")
+        os.remove("video.mp4")
+        await panel.delete()
 
-    if cmd in commands:
-        try:
-            await commands[cmd].run(bot, message, args)
-        except Exception as e:
-            await message.reply(f"❌ Error: {e}")
+    except Exception as e:
 
+        await panel.edit_text(f"""
+❌ Không tải được video
 
-# 🔥 ANTI BOT JOIN (chỉ chạy khi ON)
-@dp.chat_member()
-async def anti_bot(event: types.ChatMemberUpdated):
-    try:
-        g = json.load(open("group.json"))
-        if not g.get("antibot"):
-            return
+📎 {url}
 
-        if event.new_chat_member.user.is_bot:
-            await bot.ban_chat_member(
-                event.chat.id,
-                event.new_chat_member.user.id
-            )
-    except:
-        pass
-
-
-async def main():
-    print("🔥 USERMAP BOT RUNNING")
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+⚠️ Có thể video bị private / hạn chế
+""")
