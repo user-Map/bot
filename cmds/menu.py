@@ -11,6 +11,9 @@ async def run(bot, message, args):
 🎧 MUSIC SYSTEM
 ┠➤ ..nhac <tên bài>
 
+🎬 VIDEO
+┠➤ ..tiktok <link>
+
 🖼 IMAGE
 ┠➤ ..img <từ khoá>
 
