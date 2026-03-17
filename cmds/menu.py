@@ -2,16 +2,16 @@ async def run(bot, message, args):
 
     text = """
 ╔══════════════════╗
-   🔥 𝗨𝗦𝗘𝗥𝗠𝗔𝗣 𝗩𝗜𝗣 🔥
+   🔥 𝗨𝗦𝗘𝗥𝗠𝗔𝗣 MENU 🔥
 ╚══════════════════╝
 
 👤 THÔNG TIN
-┠➤ ..id
-┠➤ ..ai hello
-┠➤ ..img chó
+┠➤ ..id [id user]
+┠➤ ..ai [chat ai]
+┠➤ ..img [ảnh gg]
 
 🏆 TIỆN ÍCH
-┠➤ ..top
+┠➤ ..top [Top chat]
 
 👮 QUẢN LÝ
 ┠➤ ..kick (reply)
