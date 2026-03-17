@@ -2,104 +2,69 @@ import requests
 import os
 from aiogram.types import FSInputFile
 
+headers = {
+    "user-agent": "Mozilla/5.0"
+}
+
 def get_real_url(url):
-    return requests.get(url, allow_redirects=True, timeout=10).url
+    r = requests.get(url, allow_redirects=True, headers=headers, timeout=10)
+    return r.url
 
 
 async def run(bot, message, args):
 
     if not args:
-        await message.reply("""
-╔══════════════════╗
-   🎬 TIKTOK DOWNLOADER
-╚══════════════════╝
-
-⚡ Dùng:
-..tiktok link
-""")
+        await message.reply("⚡ dùng: ..tiktok link")
         return
 
     url = args[0]
 
-    panel = await message.reply(f"""
-╔══════════════════════╗
-   🎬 ĐANG PHÂN TÍCH LINK
-╚══════════════════════╝
-
-🔗 Link: {url}
-
-⏳ Vui lòng chờ...
+    panel = await message.reply("""
+╔══════════════════╗
+   🎬 ĐANG XỬ LÝ
+╚══════════════════╝
 """)
 
     try:
 
-        # mở link rút gọn
-        if "vt.tiktok.com" in url or "vm.tiktok.com" in url:
+        if "vt.tiktok.com" in url:
             url = get_real_url(url)
 
-        await panel.edit_text("""
-╔══════════════════════╗
-   🔎 ĐANG LẤY DỮ LIỆU
-╚══════════════════════╝
+        api = f"https://www.tikwm.com/api/?url={url}"
 
-📡 Kết nối server TikTok...
-""")
+        res = requests.get(api, headers=headers, timeout=30)
 
-        api = f"https://tikwm.com/api/?url={url}"
-        data = requests.get(api, timeout=20).json()
+        data = res.json()
 
-        if not data.get("data"):
-            await panel.edit_text("""
-❌ Không lấy được video
-
-📌 Có thể:
-• Video private
-• API lỗi
-• Link sai
-""")
+        if "data" not in data:
+            await panel.edit_text("❌ API không trả dữ liệu")
             return
 
         video_url = data["data"]["play"]
         title = data["data"]["title"]
         author = data["data"]["author"]["nickname"]
 
-        await panel.edit_text(f"""
-╔══════════════════════╗
-   ⬇️ ĐANG TẢI VIDEO HD
-╚══════════════════════╝
+        await panel.edit_text("⬇️ Đang tải video HD...")
 
-🎬 Nội dung:
-{title[:50]}...
+        video = requests.get(video_url, headers=headers, timeout=60).content
 
-👤 {author}
-""")
-
-        video = requests.get(video_url, timeout=60).content
-
-        with open("tiktok.mp4", "wb") as f:
+        with open("tt.mp4", "wb") as f:
             f.write(video)
 
-        file = FSInputFile("tiktok.mp4")
+        file = FSInputFile("tt.mp4")
 
         await bot.send_video(
             chat_id=message.chat.id,
             video=file,
             caption=f"""
-╔══════════════════════╗
-      🎬 TIKTOK VIDEO
-╚══════════════════════╝
+🎬 {title}
 
-📝 Nội dung:
-{title}
-
-👤 Tác giả: {author}
-
-✨ USERMAP VIP
+👤 {author}
 """
         )
 
-        os.remove("tiktok.mp4")
+        os.remove("tt.mp4")
         await panel.delete()
 
     except Exception as e:
-        await panel.edit_text(f"❌ Lỗi tải video:\n{e}")
+        await panel.edit_text(f"❌ Lỗi: {e}")
