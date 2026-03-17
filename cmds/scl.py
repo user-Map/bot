@@ -15,14 +15,16 @@ async def run(bot, message, args):
         async with session.get(url) as res:
             data = await res.json()
 
-    if not data:
+    if "results" not in data:
         return await message.reply("❌ Không tìm thấy")
 
-    cache[message.message_id] = data[:5]
+    songs = data["results"]
+
+    cache[message.message_id] = songs
 
     text = "🎵 DANH SÁCH NHẠC\n\n"
 
-    for i, song in enumerate(data[:5], 1):
+    for i, song in enumerate(songs[:5], 1):
         text += f"{i}. {song['title']}\n"
 
     text += "\n👉 Reply số để chọn"
