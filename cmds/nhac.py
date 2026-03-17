@@ -6,7 +6,7 @@ async def run(bot, message, args):
     query = " ".join(args)
 
     if not query:
-        await message.reply("🎧 Nhập tên bài hát\nVí dụ: ..nhac 1000 năm")
+        await message.reply("🎧 Nhập tên bài hát\nVí dụ: ..nhac 100 năm")
         return
 
     await message.reply("🔎 Đang tìm nhạc...")
@@ -25,7 +25,7 @@ async def run(bot, message, args):
 
         await bot.send_audio(
             chat_id=message.chat.id,
-            audio=open(file, 'rb'),
+            audio=file,
             title=title
         )
 
