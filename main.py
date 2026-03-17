@@ -5,19 +5,18 @@ import importlib
 import json
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.enums import ParseMode
 
 TOKEN = os.environ.get("BOT_TOKEN")
 PREFIX = ".."
 
-bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(TOKEN)
 dp = Dispatcher()
 
 commands = {}
 start_time = time.time()
 
 
-# tạo json nếu chưa có
+# tạo file json nếu chưa có
 if not os.path.exists("group.json"):
     open("group.json", "w").write('{"warn":{},"antilink":false,"antibot":false}')
 
@@ -25,7 +24,7 @@ if not os.path.exists("admins.json"):
     open("admins.json", "w").write('{"owner":[],"admin":[]}')
 
 
-# load cmds
+# load command
 def load_commands():
     commands.clear()
     for file in os.listdir("cmds"):
@@ -44,7 +43,7 @@ async def handle(message: types.Message):
     if not message.text:
         return
 
-    # anti link
+    # ANTI LINK
     try:
         g = json.load(open("group.json"))
         if g.get("antilink"):
@@ -54,21 +53,13 @@ async def handle(message: types.Message):
     except:
         pass
 
-    # phải có prefix
+    # PREFIX
     if not message.text.startswith(PREFIX):
         return
 
-    # tách lệnh chuẩn
-    text = message.text[len(PREFIX):]
-    parts = text.split()
+    args = message.text[len(PREFIX):].split()
+    cmd = args[0].lower()
 
-    if not parts:
-        return
-
-    cmd = parts[0].lower()
-    args = parts  # ⭐ QUAN TRỌNG → giữ nguyên để tiktok dùng args[1]
-
-    # system
     if cmd == "reload":
         load_commands()
         return await message.reply("♻️ Reload OK")
@@ -77,26 +68,26 @@ async def handle(message: types.Message):
         up = int(time.time() - start_time)
         return await message.reply(f"⏱ Uptime: {up}s")
 
-    # chạy command
     if cmd in commands:
         try:
             await commands[cmd].run(bot, message, args)
         except Exception as e:
             await message.reply(f"❌ Error: {e}")
-    else:
-        await message.reply("❌ Lệnh không tồn tại")
 
 
+# ANTI BOT JOIN
 @dp.chat_member()
 async def anti_bot(event: types.ChatMemberUpdated):
     try:
         g = json.load(open("group.json"))
-        if g.get("antibot"):
-            if event.new_chat_member.user.is_bot:
-                await bot.ban_chat_member(
-                    event.chat.id,
-                    event.new_chat_member.user.id
-                )
+        if not g.get("antibot"):
+            return
+
+        if event.new_chat_member.user.is_bot:
+            await bot.ban_chat_member(
+                event.chat.id,
+                event.new_chat_member.user.id
+            )
     except:
         pass
 
