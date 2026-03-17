@@ -1,25 +1,29 @@
 async def run(bot, message, args):
 
     text = """
-🔥 USERMAP VIP 🔥
-━━━━━━━━━━━━━━━
+╔══════════════════╗
+        🔥 USERMAP VIP
+╚══════════════════╝
 
-🤖 AI
+🤖 AI SYSTEM
 ┠➤ ..ai <câu hỏi>
 
-🖼 ẢNH
+🎧 MUSIC SYSTEM
+┠➤ ..nhac <tên bài>
+
+🖼 IMAGE
 ┠➤ ..img <từ khoá>
 
-🌦 THỜI TIẾT
+🌦 WEATHER
 ┠➤ ..weather <thành phố>
-
-⚙️ ADMIN
-┠➤ ..manager
 
 👤 USER
 ┠➤ ..info
 ┠➤ ..id
 ┠➤ ..avatar
+
+👮 MANAGER
+┠➤ ..manager
 
 ⚡ SYSTEM
 ┠➤ ..ping
