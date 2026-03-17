@@ -1,10 +1,14 @@
 import re
 import os
+import requests
 import yt_dlp
-from aiogram.types import FSInputFile
+from aiogram import Router, F
+from aiogram.types import Message, FSInputFile
+
+router = Router()
 
 
-def get_tiktok_url(text):
+def get_url(text):
     urls = re.findall(r'(https?://\S+)', text)
     for u in urls:
         if "tiktok" in u:
@@ -12,27 +16,41 @@ def get_tiktok_url(text):
     return None
 
 
-async def run(bot, message, args):
+def expand_url(url):
+    try:
+        r = requests.get(url, allow_redirects=True, timeout=10)
+        return r.url
+    except:
+        return url
 
-    url = get_tiktok_url(message.text)
 
+@router.message(F.text)
+async def auto_tiktok(message: Message):
+
+    url = get_url(message.text)
     if not url:
-        await message.reply("❌ Không tìm thấy link TikTok")
         return
 
     panel = await message.reply("""
 ╔══════════════════╗
-   🎬 ĐANG TẢI VIDEO
+   🎬 ĐANG TẢI TIKTOK
+   ⏳ Vui lòng chờ...
 ╚══════════════════╝
 """)
 
-    try:
+    url = expand_url(url)
 
-        ydl_opts = {
-            'outtmpl': 'video.mp4',
-            'format': 'mp4',
-            'quiet': True
+    ydl_opts = {
+        'outtmpl': 'video.mp4',
+        'format': 'best',
+        'quiet': True,
+        'noplaylist': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10)'
         }
+    }
+
+    try:
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -41,13 +59,12 @@ async def run(bot, message, args):
 
         file = FSInputFile("video.mp4")
 
-        await bot.send_document(
-            chat_id=message.chat.id,
+        await message.reply_document(
             document=file,
             caption=f"""
 🎬 {title}
 
-⬇️ USERMAP DOWNLOADER
+⬇️ USERMAP DOWNLOADER PRO
 """
         )
 
@@ -55,4 +72,12 @@ async def run(bot, message, args):
         await panel.delete()
 
     except Exception as e:
-        await panel.edit_text(f"❌ Lỗi tải:\n{e}")
+
+        await panel.edit_text(f"""
+❌ Không tải được video
+
+📎 Link:
+{url}
+
+⚠️ Có thể video bị hạn chế / private
+""")
