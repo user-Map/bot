@@ -15,5 +15,14 @@ async def run(bot, message, args):
 
 ⚙️ ADMIN
 ┠➤ ..manager
+
+👤 USER
+┠➤ ..info
+┠➤ ..id
+┠➤ ..avatar
+
+⚡ SYSTEM
+┠➤ ..ping
+┠➤ ..uptime
 """
     await message.reply(text)
