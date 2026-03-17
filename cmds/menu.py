@@ -6,7 +6,7 @@ async def run(bot, message, args):
 ╚══════════════════╝
 
 🤖 AI SYSTEM
-┠➤ ..ai <câu hỏi>
+┠➤ ..ask <câu hỏi>
 
 🎧 MUSIC SYSTEM
 ┠➤ ..nhac <tên bài>
