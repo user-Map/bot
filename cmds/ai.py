@@ -1,5 +1,6 @@
 import requests
 import os
+import asyncio
 
 API_KEY = os.getenv("GROQ_KEY")
 
@@ -24,6 +25,10 @@ async def run(bot, message, args):
         "content": text
     })
 
+    # giả typing cho real
+    await bot.send_chat_action(chat_id, "typing")
+    await asyncio.sleep(1.5)
+
     try:
         r = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -32,15 +37,16 @@ async def run(bot, message, args):
                 "Content-Type": "application/json"
             },
             json={
-               "model": "llama-3.1-8b-instant",
-                "messages": memory[chat_id][-10:]
+                "model": "llama-3.1-8b-instant",
+                "messages": memory[chat_id][-12:],
+                "temperature": 0.8
             },
             timeout=60
         )
 
         data = r.json()
 
-        # ⭐ CHECK ERROR
+        # check lỗi API
         if "error" in data:
             return await message.reply("❌ API lỗi: " + str(data["error"]["message"]))
 
