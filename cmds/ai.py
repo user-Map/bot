@@ -11,7 +11,6 @@ async def run(bot, message, args):
         return await message.reply("⚡ dùng: ..ai nội_dung")
 
     text = " ".join(args[1:])
-
     chat_id = message.chat.id
 
     if chat_id not in memory:
@@ -38,6 +37,10 @@ async def run(bot, message, args):
 
         data = r.json()
 
+        # ⭐ CHECK ERROR
+        if "choices" not in data:
+            return await message.reply(f"❌ OpenAI lỗi:\n{data}")
+
         reply = data["choices"][0]["message"]["content"]
 
         memory[chat_id].append({
@@ -48,4 +51,4 @@ async def run(bot, message, args):
         await message.reply(reply)
 
     except Exception as e:
-        await message.reply("❌ AI lỗi: " + str(e))
+        await message.reply("❌ AI crash: " + str(e))
