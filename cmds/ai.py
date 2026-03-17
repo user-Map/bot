@@ -32,7 +32,7 @@ async def run(bot, message, args):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "llama3-8b-8192",
+               "model": "llama-3.1-8b-instant",
                 "messages": memory[chat_id][-10:]
             },
             timeout=60
