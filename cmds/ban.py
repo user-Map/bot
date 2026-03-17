@@ -1,14 +1,18 @@
+import json
+
 async def run(bot, message, args):
 
-    if message.chat.type == "private":
-        return await message.reply("❌ chỉ dùng nhóm")
+    data = json.load(open("admins.json"))
+    uid = message.from_user.id
+
+    if uid not in data["owner"] and uid not in data["admin"]:
+        return await message.reply("❌ Không có quyền")
 
     if not message.reply_to_message:
-        return await message.reply("⚡ reply người cần ban")
+        return await message.reply("⚠️ Reply người cần ban")
 
-    try:
-        uid = message.reply_to_message.from_user.id
-        await bot.ban_chat_member(message.chat.id, uid)
-        await message.reply("🚫 đã ban")
-    except:
-        await message.reply("❌ bot cần quyền admin")
+    user = message.reply_to_message.from_user.id
+
+    await bot.ban_chat_member(message.chat.id, user)
+
+    await message.reply("🚫 Đã ban")
