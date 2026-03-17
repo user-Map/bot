@@ -8,33 +8,28 @@ async def run(bot, message: types.Message, args):
 
     query = " ".join(args[1:])
 
-    await message.reply("🔎 Đang tìm nhạc...")
+    msg = await message.reply("🔎 Đang tìm nhạc...")
 
     try:
         async with aiohttp.ClientSession() as session:
 
-            # 🔥 search youtube
+            # 🔥 search nhạc
             async with session.get(
-                f"https://api.vevioz.com/api/button/youtube?q={query}"
+                f"https://api.popcat.xyz/youtube?q={query}"
             ) as res:
+                data = await res.json()
 
-                text = await res.text()
+            if not data or "url" not in data:
+                return await msg.edit_text("❌ Không tìm thấy")
 
-                # 👉 lấy video id
-                import re
-                find = re.search(r"watch\\?v=(.{11})", text)
+            video = data["url"]
 
-                if not find:
-                    return await message.reply("❌ Không tìm thấy nhạc")
+            # 🔥 lấy mp3
+            mp3 = f"https://api.popcat.xyz/ytmp3?url={video}"
 
-                vid = find.group(1)
-
-            # 🔥 lấy link mp3
-            link = f"https://api.vevioz.com/api/button/mp3/{vid}"
-
-            await message.reply(
-                f"🎧 Nhạc của bạn đây:\n{link}"
+            await msg.edit_text(
+                f"🎧 Nhạc đây:\n{mp3}"
             )
 
     except Exception as e:
-        await message.reply(f"❌ Lỗi: {e}")
+        await msg.edit_text(f"❌ Lỗi: {e}")
