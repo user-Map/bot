@@ -6,10 +6,10 @@ async def run(bot, message, args):
     query = " ".join(args)
 
     if not query:
-        await message.reply("🎧 Nhập tên bài hát\nVí dụ: ..nhac 100 năm")
+        await message.reply("🎧 Nhập tên bài hát\nVí dụ: ..nhac 1000 năm")
         return
 
-    msg = await message.reply("🔎 Đang tìm nhạc...")
+    await message.reply("🔎 Đang tìm nhạc...")
 
     ydl_opts = {
         'format': 'bestaudio',
@@ -30,7 +30,6 @@ async def run(bot, message, args):
         )
 
         os.remove(file)
-        await msg.delete()
 
     except Exception as e:
-        await msg.edit(f"❌ Lỗi lấy nhạc\n{e}")
+        await message.reply(f"❌ Lỗi lấy nhạc\n{e}")
