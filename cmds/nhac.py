@@ -1,44 +1,36 @@
-from aiogram import types
-from aiogram.filters import Command
 import yt_dlp
 import os
 
-def setup(dp):
+async def run(bot, message, args):
 
-    @dp.message(Command("nhac"))
-    async def nhac_handler(message: types.Message):
+    query = " ".join(args)
 
-        text = message.text.replace("/nhac", "").strip()
+    if not query:
+        await message.reply("🎧 Nhập tên bài hát\nVí dụ: ..nhac 100 năm")
+        return
 
-        if not text:
-            await message.reply(
-                "🎧 Nhập tên bài hát\nVí dụ:\n/nhac Sơn Tùng MTP"
-            )
-            return
+    msg = await message.reply("🔎 Đang tìm nhạc...")
 
-        await message.reply("🔎 Đang tìm nhạc...")
+    ydl_opts = {
+        'format': 'bestaudio',
+        'outtmpl': 'song.%(ext)s',
+        'quiet': True
+    }
 
-        ydl_opts = {
-            'format': 'bestaudio',
-            'outtmpl': 'song.%(ext)s',
-            'quiet': True
-        }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"ytsearch1:{query}", download=True)
+            file = ydl.prepare_filename(info['entries'][0])
+            title = info['entries'][0]['title']
 
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(
-                    f"ytsearch1:{text}",
-                    download=True
-                )
+        await bot.send_audio(
+            chat_id=message.chat.id,
+            audio=open(file, 'rb'),
+            title=title
+        )
 
-                file = ydl.prepare_filename(info['entries'][0])
+        os.remove(file)
+        await msg.delete()
 
-            await message.reply_audio(
-                audio=types.FSInputFile(file),
-                title=info['entries'][0]['title']
-            )
-
-            os.remove(file)
-
-        except:
-            await message.reply("❌ Không lấy được nhạc")
+    except Exception as e:
+        await msg.edit(f"❌ Lỗi lấy nhạc\n{e}")
