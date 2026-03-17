@@ -1,10 +1,13 @@
 import os
-import importlib
 import time
-from aiogram import Bot, Dispatcher, types
 import asyncio
+import importlib
 
-TOKEN = "8603942729:AAGE1RaT8oXoVhWCXhKhp5fbAdQVKHqOIL4"
+from aiogram import Bot, Dispatcher, types
+
+# 🔐 lấy token từ Railway Variables
+TOKEN = os.environ.get("BOT_TOKEN")
+
 PREFIX = ".."
 
 bot = Bot(TOKEN)
@@ -13,7 +16,8 @@ dp = Dispatcher()
 commands = {}
 start_time = time.time()
 
-# ===== LOAD COMMAND =====
+
+# 🔥 load toàn bộ lệnh trong thư mục cmds
 def load_commands():
     commands.clear()
     for file in os.listdir("cmds"):
@@ -22,38 +26,44 @@ def load_commands():
             module = importlib.import_module(f"cmds.{name}")
             commands[name] = module
 
+
 load_commands()
 
-# ===== MESSAGE =====
+
 @dp.message()
 async def handle(message: types.Message):
 
-    text = message.text
-    if not text:
+    if not message.text:
         return
 
-    if not text.startswith(PREFIX):
+    if not message.text.startswith(PREFIX):
         return
 
-    args = text[len(PREFIX):].split()
-    cmd = args[0]
+    args = message.text[len(PREFIX):].split()
+    cmd = args[0].lower()
 
-    # reload
+    # ⭐ reload bot
     if cmd == "reload":
         load_commands()
         return await message.reply("♻️ Reload OK")
 
-    # uptime
+    # ⭐ uptime
     if cmd == "uptime":
         up = int(time.time() - start_time)
         return await message.reply(f"⏱ Uptime: {up}s")
 
+    # ⭐ gọi lệnh trong cmds
     if cmd in commands:
-        await commands[cmd].run(bot, message, args)
+        try:
+            await commands[cmd].run(bot, message, args)
+        except Exception as e:
+            await message.reply(f"❌ Error: {e}")
 
-# ===== START =====
+
 async def main():
-    print("🔥 BOT ULTRA RUNNING")
+    print("🔥 BOT USERMAP RUNNING")
     await dp.start_polling(bot)
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
