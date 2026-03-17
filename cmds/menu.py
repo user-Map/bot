@@ -1,18 +1,28 @@
-import os
-
 async def run(bot, message, args):
 
-    text = "📜 MENU BOT TELE\n\n"
+    text = """
+╔══════════════════╗
+   🔥 𝗨𝗦𝗘𝗥𝗠𝗔𝗣 𝗩𝗜𝗣 🔥
+╚══════════════════╝
 
-    total = 0
+👤 THÔNG TIN
+┠➤ ..id
+┠➤ ..ai hello
+┠➤ ..img chó
 
-    for root, dirs, files in os.walk("cmds"):
-        for file in files:
-            if file.endswith(".py"):
-                cmd = file[:-3]
-                text += f"⚡ ..{cmd}\n"
-                total += 1
+🏆 TIỆN ÍCH
+┠➤ ..top
 
-    text += f"\n🔥 Tổng lệnh: {total}"
+👮 QUẢN LÝ
+┠➤ ..kick (reply)
+┠➤ ..ban (reply)
+
+⚙️ ADMIN
+┠➤ ..reload
+┠➤ ..uptime
+
+
+      ᵇᵒᵗ ᵇʸ 𝗻𝗴𝘂𝘆𝗲𝗻𝗸𝗵𝗼𝗶
+"""
 
     await message.reply(text)
