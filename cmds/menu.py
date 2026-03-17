@@ -1,18 +1,18 @@
-async def run(bot, message):
+import os
 
-    text = """
-🤖 MENU BOT TELE
+async def run(bot, message, args):
 
-📌 Nhóm lệnh cơ bản
-..ping → test bot
+    text = "📜 MENU BOT TELE\n\n"
 
-📌 Sau này sẽ có:
-..down → tải video
-..img → tìm ảnh
-..ai → chat AI
-..admin → quản lý nhóm
+    total = 0
 
-🔥 Bot đang convert từ Zalo sang Telegram
-"""
+    for root, dirs, files in os.walk("cmds"):
+        for file in files:
+            if file.endswith(".py"):
+                cmd = file[:-3]
+                text += f"⚡ ..{cmd}\n"
+                total += 1
+
+    text += f"\n🔥 Tổng lệnh: {total}"
 
     await message.reply(text)
