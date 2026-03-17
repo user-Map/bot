@@ -22,6 +22,11 @@ async def run(bot, message, args):
         👮 MANAGER
 ╚══════════════════╝
 
+👑 ADMIN SYSTEM
+┠➤ ..addadmin (reply)
+┠➤ ..removeadmin (reply)
+┠➤ ..listadmin
+
 ⚙️ BOT
 ┠➤ ..reload
 ┠➤ ..uptime
