@@ -1,5 +1,4 @@
 import aiohttp
-import asyncio
 
 cache = {}
 
@@ -10,7 +9,7 @@ async def run(bot, message, args):
     if not query:
         return await message.reply("🎧 Nhập tên bài: ..scl <tên>")
 
-    url = f"https://api-vn1.zaclys.com/music/search?q={query}"
+    url = f"https://api.popcat.xyz/soundcloud?q={query}"
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as res:
