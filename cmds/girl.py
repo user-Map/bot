@@ -1,4 +1,5 @@
 import requests
+import random
 
 async def run(bot, message, args):
 
@@ -8,24 +9,30 @@ async def run(bot, message, args):
         api = "https://nqduan.id.vn/api/images?category=girl"
         res = requests.get(api, timeout=30).json()
 
-        # ⭐ bắt mọi dạng json
-        img = None
+        imgs = []
 
+        # ⭐ bắt mọi dạng JSON
         if isinstance(res, dict):
-            img = res.get("url") or res.get("data") or res.get("result")
+            imgs = res.get("data") or res.get("result") or res.get("url")
         elif isinstance(res, list):
-            img = res[0]
+            imgs = res
 
-        if not img:
+        # ⭐ nếu chỉ là 1 link string
+        if isinstance(imgs, str):
+            imgs = [imgs]
+
+        if not imgs:
             return await msg.edit_text("❌ API không trả ảnh")
 
         await msg.delete()
 
-        await bot.send_photo(
-            message.chat.id,
-            img,
-            caption="💖 Girl Random"
-        )
+        # ⭐ gửi random 3 ảnh
+        for img in random.sample(imgs, min(3, len(imgs))):
+            await bot.send_photo(
+                message.chat.id,
+                img,
+                caption="💖 Girl Random"
+            )
 
     except Exception as e:
         await message.reply(f"❌ Lỗi GIRL: {e}")
