@@ -11,7 +11,9 @@
 🎧 Music • 🎬 TikTok Downloader • 🖼 Image • 🌦 Weather • 🎮 Game • 👤 User • 👮 Manager
 
 ## Install
+ ```js
 pip install aiogram requests
+ ```
 ## Run bot
 export BOT_TOKEN=YOUR_TOKEN
 python main.py
