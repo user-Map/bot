@@ -1,83 +1,37 @@
-import re
-import os
 import requests
-import yt_dlp
-from aiogram import Router, F
-from aiogram.types import Message, FSInputFile
 
-router = Router()
+async def run(bot, message, args):
 
+    if len(args) < 2:
+        return await message.reply("❌ Dùng: ..tiktok <link>")
 
-def get_url(text):
-    urls = re.findall(r'(https?://\S+)', text)
-    for u in urls:
-        if "tiktok" in u:
-            return u
-    return None
-
-
-def expand_url(url):
-    try:
-        r = requests.get(url, allow_redirects=True, timeout=10)
-        return r.url
-    except:
-        return url
-
-
-@router.message(F.text)
-async def auto_tiktok(message: Message):
-
-    url = get_url(message.text)
-    if not url:
-        return
-
-    panel = await message.reply("""
-╔══════════════════╗
-   🎬 ĐANG TẢI TIKTOK
-   ⏳ Vui lòng chờ...
-╚══════════════════╝
-""")
-
-    url = expand_url(url)
-
-    ydl_opts = {
-        'outtmpl': 'video.mp4',
-        'format': 'best',
-        'quiet': True,
-        'noplaylist': True,
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10)'
-        }
-    }
+    link = args[1]
 
     try:
+        msg = await message.reply("📥 Đang tải video TikTok...")
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+        api = f"https://nqduan.id.vn/api/tiktok?action=download&url={link}"
+        res = requests.get(api, timeout=60).json()
 
-        title = info.get("title", "TikTok Video")
+        data = res["data"]
 
-        file = FSInputFile("video.mp4")
+        video = data["play"]
+        music = data["music"]
+        title = data["title"]
 
-        await message.reply_document(
-            document=file,
-            caption=f"""
-🎬 {title}
-
-⬇️ USERMAP DOWNLOADER PRO
-"""
+        await bot.send_video(
+            message.chat.id,
+            video,
+            caption=f"🎬 {title}"
         )
 
-        os.remove("video.mp4")
-        await panel.delete()
+        await bot.send_audio(
+            message.chat.id,
+            music,
+            caption="🎧 Nhạc từ video"
+        )
+
+        await msg.delete()
 
     except Exception as e:
-
-        await panel.edit_text(f"""
-❌ Không tải được video
-
-📎 Link:
-{url}
-
-⚠️ Có thể video bị hạn chế / private
-""")
+        await message.reply(f"❌ Lỗi tải TikTok: {e}")
