@@ -16,6 +16,7 @@ async def run(bot, message, args):
 
 🖼 IMAGE
 ┠➤ ..img [từ khoá]
+┠➤ ..girl
 
 🌦 WEATHER
 ┠➤ ..weather [thành phố]
