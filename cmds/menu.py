@@ -2,7 +2,7 @@ async def run(bot, message, args):
 
     text = """
 ╔══════════════════╗
-        🔥 USERMAP VIP
+        🔥 USERMAP MENU
 ╚══════════════════╝
 
 🤖 AI SYSTEM
@@ -21,12 +21,13 @@ async def run(bot, message, args):
 ┠➤ ..weather [thành phố]
 
 🎮 GAME
-┠➤ ..lq [Acc lq ngẩu nhiên]
+┠➤ ..lq [Acc lq ngẫu nhiên]
 
 👤 USER
 ┠➤ ..info 
 ┠➤ ..id
 ┠➤ ..avatar
+┠➤ ..fb [id facebook]
 
 👮 MANAGER
 ┠➤ ..manager
