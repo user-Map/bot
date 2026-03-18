@@ -15,11 +15,15 @@
 pip install aiogram requests
  ```
 ## Run bot
+ ```js
 export BOT_TOKEN=YOUR_TOKEN
 python main.py
+ ```
 ## Windowsset 
+ ```js
 BOT_TOKEN=YOUR_TOKEN
 python main.py
+ ```
 ## Features
 •	AI Chat System
 	•	Music Player From Keyword
