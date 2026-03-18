@@ -11,13 +11,21 @@ async def run(bot, message, args):
     try:
         msg = await message.reply("🖼 Đang tìm ảnh ...")
 
-        url = f"https://nqduan.id.vn/api/pinterest?query={query}&limit=10"
-        res = requests.get(url, timeout=30).json()
+        url = f"https://nqduan.id.vn/api/pinterest?query={query}&limit=15"
+        res = requests.get(url, timeout=40).json()
 
-        imgs = res.get("result")
+        imgs = []
+
+        # ⭐ bắt mọi dạng json
+        if "data" in res:
+            imgs = res["data"]
+        elif "result" in res:
+            imgs = res["result"]
+        elif isinstance(res, list):
+            imgs = res
 
         if not imgs:
-            return await msg.edit_text("❌ Không tìm thấy ảnh")
+            return await msg.edit_text("❌ API không trả ảnh")
 
         await msg.delete()
 
