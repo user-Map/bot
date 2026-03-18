@@ -31,7 +31,7 @@ async def run(bot, message, args):
             await bot.send_photo(
                 message.chat.id,
                 img,
-                caption="💖 Girl Random"
+                caption="💖 Girl Của bạn"
             )
 
     except Exception as e:
