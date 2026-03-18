@@ -25,7 +25,7 @@ async def run(bot, message, args):
     city = " ".join(args[1:])
 
     try:
-        msg = await message.reply("🌦 Đang lấy thời tiết VIP...")
+        msg = await message.reply("🌦 Đang lấy thời tiết ...")
 
         # ⭐ LẤY TOẠ ĐỘ
         geo = requests.get(
@@ -51,7 +51,7 @@ async def run(bot, message, args):
 
         text = f"""
 ┏━━━━━━━━━━━━━━━━━━━┓
-      🌦 𝗪𝗘𝗔𝗧𝗛𝗘𝗥 𝗩𝗜𝗣
+      🌦 𝗪𝗘𝗔𝗧𝗛𝗘𝗥 
 ┗━━━━━━━━━━━━━━━━━━━┛
 
 📍 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻 : {name}
