@@ -5,12 +5,12 @@
 ██║   ██║╚════██║██╔══╝  ██╔══██╗██║╚██╔╝██║██╔══██║██╔═══╝ 
 ╚██████╔╝███████║███████╗██║  ██║██║ ╚═╝ ██║██║  ██║██║     
  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     
-
  🚀 Ultimate Multi-Function Telegram Bot
 🎧 Music • 🎬 TikTok Downloader • 🖼 Image • 🌦 Weather • 🎮 Game • 👤 User • 👮 Manager
+
 ## Install
 pip install aiogram requests
-## run bot
+## Run bot
 export BOT_TOKEN=YOUR_TOKEN
 python main.py
 ## Windowsset 
