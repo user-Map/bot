@@ -15,13 +15,16 @@ async def run(bot, message, args):
 ┠➤ ..tiktok [link]
 
 🖼 IMAGE
-┠➤ ..img <từ khoá>
+┠➤ ..img [từ khoá]
 
 🌦 WEATHER
-┠➤ ..weather <thành phố>
+┠➤ ..weather [thành phố]
+
+🎮 GAME
+┠➤ ..lq [Acc lq ngẩu nhiên]
 
 👤 USER
-┠➤ ..info
+┠➤ ..info 
 ┠➤ ..id
 ┠➤ ..avatar
 
