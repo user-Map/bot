@@ -1,63 +1,71 @@
+import discord
+from discord.ext import commands
 import os
 import time
-import asyncio
 import importlib
 import json
+import os
 
-from aiogram import Bot, Dispatcher, types
-
-TOKEN = os.environ.get("BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
 PREFIX = ".."
 
-bot = Bot(TOKEN)
-dp = Dispatcher()
+intents = discord.Intents.default()
+intents.message_content = True
 
-commands = {}
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
+
+commands_map = {}
 start_time = time.time()
 
 
 # tạo file json nếu chưa có
 if not os.path.exists("group.json"):
-    open("group.json", "w").write('{"warn":{},"antilink":false,"antibot":false}')
+    with open("group.json", "w") as f:
+        f.write('{"warn":{},"antilink":false,"antibot":false}')
 
 if not os.path.exists("admins.json"):
-    open("admins.json", "w").write('{"owner":[],"admin":[]}')
+    with open("admins.json", "w") as f:
+        f.write('{"owner":[],"admin":[]}')
 
 
-# load command
+# load commands
 def load_commands():
-    commands.clear()
+    commands_map.clear()
     for file in os.listdir("cmds"):
         if file.endswith(".py"):
             name = file[:-3]
             module = importlib.import_module(f"cmds.{name}")
             importlib.reload(module)
-            commands[name] = module
+            commands_map[name] = module
 
 load_commands()
 
 
-@dp.message()
-async def handle(message: types.Message):
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
 
-    if not message.text:
+    if not message.content:
         return
 
     # ANTI LINK
     try:
-        g = json.load(open("group.json"))
+        with open("group.json") as f:
+            g = json.load(f)
+
         if g.get("antilink"):
-            if "http" in message.text or "t.me" in message.text:
+            if "http" in message.content or "t.me" in message.content:
                 await message.delete()
                 return
     except:
         pass
 
     # PREFIX
-    if not message.text.startswith(PREFIX):
+    if not message.content.startswith(PREFIX):
         return
 
-    args = message.text[len(PREFIX):].split()
+    args = message.content[len(PREFIX):].split()
     cmd = args[0].lower()
 
     if cmd == "reload":
@@ -68,34 +76,31 @@ async def handle(message: types.Message):
         up = int(time.time() - start_time)
         return await message.reply(f"⏱ Uptime: {up}s")
 
-    if cmd in commands:
+    if cmd in commands_map:
         try:
-            await commands[cmd].run(bot, message, args)
+            await commands_map[cmd].run(bot, message, args)
         except Exception as e:
             await message.reply(f"❌ Error: {e}")
 
+    await bot.process_commands(message)
 
-# ANTI BOT JOIN
-@dp.chat_member()
-async def anti_bot(event: types.ChatMemberUpdated):
+
+# ANTI BOT JOIN (Discord version)
+@bot.event
+async def on_member_join(member):
     try:
-        g = json.load(open("group.json"))
-        if not g.get("antibot"):
-            return
+        with open("group.json") as f:
+            g = json.load(f)
 
-        if event.new_chat_member.user.is_bot:
-            await bot.ban_chat_member(
-                event.chat.id,
-                event.new_chat_member.user.id
-            )
+        if g.get("antibot") and member.bot:
+            await member.ban(reason="Anti bot system")
     except:
         pass
 
 
-async def main():
-    print("🔥 USERMAP BOT RUNNING")
-    await dp.start_polling(bot)
+@bot.event
+async def on_ready():
+    print("🔥 DISCORD BOT RUNNING")
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+bot.run(TOKEN)
