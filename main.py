@@ -17,9 +17,9 @@ async def setup_hook():
         if file.endswith(".py"):
             await bot.load_extension(f"cmds.{file[:-3]}")
 
-token = os.getenv("TOKEN")
+TOKEN = os.getenv("TOKEN")
 
-if token:
-    bot.run(token)
-else:
+if not TOKEN:
     print("TOKEN MISSING")
+else:
+    bot.run(TOKEN)
