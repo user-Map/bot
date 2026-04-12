@@ -19,7 +19,7 @@ async def setup_hook():
 
 TOKEN = os.getenv("TOKEN")
 
-if not TOKEN:
-    print("TOKEN MISSING")
-else:
+if TOKEN:
     bot.run(TOKEN)
+else:
+    print("TOKEN MISSING")
