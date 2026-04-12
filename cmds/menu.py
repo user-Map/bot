@@ -1,6 +1,13 @@
-async def run(bot, message, args):
+ẽfrom discord.ext import commands
 
-    text = """
+class Menu(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def menu(self, ctx):
+
+        text = """
 ╔══════════════════╗
         🔥 USERMAP MENU
 ╚══════════════════╝
@@ -25,16 +32,17 @@ async def run(bot, message, args):
 ┠➤ ..lq [Acc lq ngẫu nhiên]
 
 👤 USER
-┠➤ ..info 
+┠➤ ..info
 ┠➤ ..id
 ┠➤ ..avatar
 ┠➤ ..fb [id facebook]
-
-👮 MANAGER
-┠➤ ..manager
 
 ⚡ SYSTEM
 ┠➤ ..ping
 ┠➤ ..uptime
 """
-    await message.reply(text)
+
+        await ctx.send(text)
+
+async def setup(bot):
+    await bot.add_cog(Menu(bot))
