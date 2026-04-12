@@ -1,6 +1,6 @@
+discord.py==2.4.0
 aiohttp
 requests
 python-dotenv
 beautifulsoup4
 yt-dlp
-discord.py
