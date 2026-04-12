@@ -7,13 +7,9 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="..", intents=intents)
 
-token = os.getenv("TOKEN")
-
-
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
-
 
 @bot.event
 async def setup_hook():
@@ -21,8 +17,9 @@ async def setup_hook():
         if file.endswith(".py"):
             await bot.load_extension(f"cmds.{file[:-3]}")
 
+token = os.getenv("TOKEN")
 
-if not token:
-    print("TOKEN MISSING")
-else:
+if token:
     bot.run(token)
+else:
+    print("TOKEN MISSING")
